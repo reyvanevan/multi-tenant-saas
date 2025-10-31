@@ -14,10 +14,6 @@ dist-ssr
 
 .env
 
-# Backup folders
-old-frontend-backup/
-frontend-temp/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
