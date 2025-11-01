@@ -1,52 +1,68 @@
-# Multi-stage build for production
-FROM node:18-alpine AS builder
+# Multi-stage build for production (Backend uses NPM, not pnpm!)
+FROM node:20-alpine AS base
 
-# Install pnpm
-RUN npm install -g pnpm
-
-# Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
+# Install system dependencies for Prisma
+RUN apk add --no-cache openssl libc6-compat
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# ========================================
+# DEPENDENCIES STAGE
+# ========================================
+FROM base AS deps
+
+# Copy package files (npm, not pnpm!)
+COPY package*.json ./
+
+# Install ALL dependencies (including dev)
+RUN npm ci
+
+# ========================================
+# BUILDER STAGE
+# ========================================
+FROM base AS builder
+
+# Copy dependencies from previous stage
+COPY --from=deps /app/node_modules ./node_modules
 
 # Copy source code
 COPY . .
 
 # Generate Prisma Client
-RUN pnpm prisma generate
+RUN npx prisma generate
 
-# Build application
-RUN pnpm run build
+# Build NestJS application
+RUN npm run build
 
-# Production stage
-FROM node:18-alpine AS production
+# ========================================
+# RUNNER STAGE (Production)
+# ========================================
+FROM base AS runner
 
-# Install pnpm
-RUN npm install -g pnpm
-
-WORKDIR /app
+# Set NODE_ENV to production
+ENV NODE_ENV=production
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package*.json ./
 
 # Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
+RUN npm ci --omit=dev
 
-# Copy built application
+# Copy Prisma schema for runtime
+COPY prisma ./prisma
+
+# Copy built application from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Generate Prisma Client (production)
+RUN npx prisma generate
 
 # Expose port
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start application
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]
