@@ -174,5 +174,35 @@ railway open
 
 ---
 
-**Last Updated:** Nov 1, 2025  
-**Status:** Build configuration fixed, awaiting deployment test
+---
+
+## Issue #3: "Prisma not found" / Wrong Docker Context
+**Date:** Nov 3, 2025  
+**Error:**
+```
+ERROR: failed to compute cache key: "/prisma": not found
+```
+
+**Root Cause:**
+- Railway auto-detected `backend/Dockerfile` instead of using `railway.json` config
+- Docker build context was ROOT but Dockerfile expected files in backend/
+- Railway ignored explicit configuration files
+
+**Solution:**
+- **Switched to NIXPACKS builder** (no Docker)
+- Renamed all Dockerfiles to `.backup` to prevent auto-detection
+- Created `railway.toml` at root with explicit build commands
+- Updated `nixpacks.toml` with correct backend path
+
+**Files Updated:**
+1. `railway.toml` - Root-level Railway config (NIXPACKS)
+2. `railway.json` - Updated to use NIXPACKS
+3. `nixpacks.toml` - Fixed commands with proper cd backend
+4. Renamed `Dockerfile*` → `Dockerfile*.backup` (prevent auto-detect)
+
+**Result:** ✅ Railway should now use NIXPACKS with explicit commands
+
+---
+
+**Last Updated:** Nov 3, 2025  
+**Status:** Switched to NIXPACKS builder, Dockerfiles disabled
