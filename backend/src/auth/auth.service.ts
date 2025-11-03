@@ -472,31 +472,67 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Check if user is superadmin by role name
-    const isSuperadmin = user.role?.name === 'SUPERADMIN' || user.role?.name === 'SUPER_ADMIN';
+    // Check if user is platform admin (tenantId = null)
+    const isPlatformUser = user.tenantId === null;
+    
+    // Platform roles: SUPER_ADMIN, DEVELOPER, SUPPORT, BILLING_ADMIN
+    const platformRoles = ['SUPER_ADMIN', 'DEVELOPER', 'SUPPORT', 'BILLING_ADMIN'];
+    const isPlatformRole = user.role?.name && platformRoles.includes(user.role.name);
 
     // Get all permissions
     const permissions = user.role?.permissions?.map(rp => rp.permission.action) || [];
 
+    // For platform users, return empty tenant/outlet context
+    if (isPlatformUser || isPlatformRole) {
+      return {
+        user: {
+          id: user.id,
+          name: `${user.firstName} ${user.lastName || ''}`.trim(),
+          email: user.email,
+          avatar: user.avatar,
+          isPlatformUser: true,
+          tenantId: null,
+          outletId: null,
+        },
+        tenant: null, // Platform users don't have tenant context
+        outlets: [], // Platform users don't have outlet context
+        role: user.role ? {
+          id: user.role.id,
+          name: user.role.name,
+          permissions,
+          level: user.role.level,
+        } : null,
+        lastTenantId: null,
+        lastOutletId: null,
+        currentOutlet: null,
+        availableTenants: [], // Will be loaded separately for platform users
+        availableOutlets: [],
+      };
+    }
+
+    // For tenant users, return tenant/outlet context
     return {
       user: {
         id: user.id,
         name: `${user.firstName} ${user.lastName || ''}`.trim(),
         email: user.email,
         avatar: user.avatar,
-        isSuperadmin,
+        isPlatformUser: false,
+        tenantId: user.tenantId,
+        outletId: user.outletId,
       },
       tenant: user.tenant ? {
         id: user.tenant.id,
         slug: user.tenant.slug,
         name: user.tenant.name,
         logo: user.tenant.logo,
-        outlets: user.tenant.outlets,
       } : null,
+      outlets: user.tenant?.outlets || [],
       role: user.role ? {
         id: user.role.id,
         name: user.role.name,
         permissions,
+        level: user.role.level,
       } : null,
       lastTenantId: user.lastTenantId,
       lastOutletId: user.lastOutletId,
@@ -505,6 +541,8 @@ export class AuthService {
         name: user.outlet.name,
         code: user.outlet.code,
       } : null,
+      availableTenants: [], // Tenant users only see their own tenant
+      availableOutlets: user.tenant?.outlets || [],
     };
   }
 
@@ -518,6 +556,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
+        role: true,
         tenant: {
           include: {
             outlets: true,
@@ -530,7 +569,65 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    // Validate tenant access (if switching tenant)
+    // Check if user is platform admin (tenantId = null)
+    const isPlatformUser = user.tenantId === null;
+    const platformRoles = ['SUPER_ADMIN', 'DEVELOPER', 'SUPPORT', 'BILLING_ADMIN'];
+    const isPlatformRole = user.role?.name && platformRoles.includes(user.role.name);
+
+    // Platform users can switch context to view specific tenant/outlet (for management purposes)
+    if (isPlatformUser || isPlatformRole) {
+      // For platform users, just validate that tenant/outlet exists
+      if (tenantId) {
+        const tenant = await this.prisma.tenant.findUnique({
+          where: { id: tenantId },
+        });
+        if (!tenant) {
+          throw new UnauthorizedException('Tenant not found');
+        }
+      }
+
+      if (outletId) {
+        const outlet = await this.prisma.outlet.findFirst({
+          where: {
+            id: outletId,
+            isActive: true,
+          },
+        });
+        if (!outlet) {
+          throw new UnauthorizedException('Outlet not found or inactive');
+        }
+      }
+
+      // Platform users don't update lastTenantId/lastOutletId in user record
+      // They just temporarily view tenant data via headers
+      
+      // Log context switch (platform users may not have tenantId)
+      if (tenantId) {
+        await this.auditLogs.log({
+          tenantId: tenantId,
+          userId: user.id,
+          action: 'CONTEXT_SWITCHED',
+          resource: 'auth',
+          resourceId: user.id,
+          newValues: {
+            tenantId: tenantId,
+            outletId: outletId || null,
+            isPlatformUser: true,
+          },
+          ipAddress,
+          userAgent,
+          status: 'SUCCESS',
+        });
+      }
+
+      return { 
+        success: true,
+        message: 'Platform context switched successfully (view mode)',
+        isPlatformUser: true,
+      };
+    }
+
+    // For tenant users, validate access to their own tenant only
     if (tenantId && tenantId !== user.tenantId) {
       throw new UnauthorizedException('You do not have access to this tenant');
     }
@@ -550,7 +647,7 @@ export class AuthService {
       }
     }
 
-    // Update last context
+    // Update last context for tenant users
     await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -578,6 +675,7 @@ export class AuthService {
     return { 
       success: true,
       message: 'Context switched successfully',
+      isPlatformUser: false,
     };
   }
 }
