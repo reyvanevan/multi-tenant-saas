@@ -22,9 +22,13 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z.object({
-  email: z.email({
-    error: (iss) => (iss.input === '' ? 'Please enter your email' : undefined),
-  }),
+  usernameOrEmail: z
+    .string()
+    .min(1, 'Please enter your email or username')
+    .refine(
+      (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) || val.length >= 3,
+      'Please enter a valid email or username',
+    ),
   password: z
     .string()
     .min(1, 'Please enter your password')
@@ -55,11 +59,11 @@ export function UserAuthForm({
     setIsLoading(true)
 
     try {
-      console.log('🔐 Attempting login with:', data.email)
+      console.log('🔐 Attempting login with:', data.usernameOrEmail)
 
       // Call real auth service
       const response = await authService.login({
-        email: data.email,
+        usernameOrEmail: data.usernameOrEmail,
         password: data.password,
       })
 
@@ -90,12 +94,12 @@ export function UserAuthForm({
       >
         <FormField
           control={form.control}
-          name='email'
+          name='usernameOrEmail'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email or Username</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input placeholder='name@example.com or username' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
