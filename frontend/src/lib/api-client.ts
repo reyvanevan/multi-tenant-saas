@@ -124,9 +124,9 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
 
-        // Redirect to login
+        // Redirect to sign-in
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          window.location.href = '/sign-in';
         }
 
         return Promise.reject(refreshError);
