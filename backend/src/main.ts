@@ -63,10 +63,11 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  const host = '0.0.0.0'; // Listen on all interfaces for Railway
+  await app.listen(port, host);
 
-  console.log(`🚀 Backend running on: http://localhost:${port}`);
-  console.log(`📚 API available at: http://localhost:${port}${apiPrefix}`);
-  console.log(`📖 Swagger docs at: http://localhost:${port}/api/docs`);
+  console.log(`🚀 Backend running on: http://${host}:${port}`);
+  console.log(`📚 API available at: http://${host}:${port}${apiPrefix}`);
+  console.log(`📖 Swagger docs at: http://${host}:${port}/api/docs`);
 }
 bootstrap();
