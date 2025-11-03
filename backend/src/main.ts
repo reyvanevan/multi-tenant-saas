@@ -21,9 +21,11 @@ async function bootstrap() {
     }),
   );
 
-  // API prefix
+  // API prefix (exclude health endpoint for Railway healthcheck)
   const apiPrefix = process.env.API_PREFIX || '/api/v1';
-  app.setGlobalPrefix(apiPrefix);
+  app.setGlobalPrefix(apiPrefix, {
+    exclude: ['health'],
+  });
 
   // Swagger API Documentation
   const config = new DocumentBuilder()
