@@ -94,10 +94,17 @@ export const authService = {
           });
           console.log('✅ Backend logout successful');
         } catch (error: any) {
-          console.warn(
-            '⚠️ Backend logout failed, clearing local state anyway:',
-            error.response?.data || error.message,
-          );
+          // 401 is expected if token expired, just log as info
+          if (error.response?.status === 401) {
+            console.info(
+              'ℹ️ Token expired during logout (expected), clearing local state',
+            );
+          } else {
+            console.warn(
+              '⚠️ Backend logout failed, clearing local state anyway:',
+              error.response?.data || error.message,
+            );
+          }
           // Continue with local logout even if backend call fails
         }
       }
