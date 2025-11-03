@@ -24,15 +24,30 @@ export enum UserStatus {
 }
 
 /**
+ * Role object from backend
+ */
+export interface Role {
+  id: string;
+  name: string;
+  level: number;
+  permissions: string[];
+  isSystem: boolean;
+}
+
+/**
  * User Interface
  */
 export interface User {
   id: string;
   email: string;
-  name: string;
-  role: UserRole;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
+  role: Role;
+  roleId: string;
   status: UserStatus;
-  tenantId: string;
+  tenantId: string | null;
   outletId?: string | null;
   lastTenantId?: string | null;
   lastOutletId?: string | null;
@@ -146,18 +161,3 @@ export interface AuthState {
   clearError: () => void;
   setUser: (user: User | null) => void;
 }
-
-export default {
-  User,
-  UserRole,
-  UserStatus,
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
-  ChangePasswordRequest,
-  UserContextResponse,
-  SwitchContextRequest,
-  AuthState,
-};

@@ -29,10 +29,10 @@ export const hasRole = (requiredRoles: string[]): boolean => {
   if (!user) return false;
 
   // SUPER_ADMIN has access to everything
-  if (user.role === 'SUPER_ADMIN') return true;
+  if (user.role.name === 'SUPER_ADMIN') return true;
 
   // Check if user's role is in requiredRoles
-  return requiredRoles.includes(user.role);
+  return requiredRoles.includes(user.role.name);
 };
 
 /**

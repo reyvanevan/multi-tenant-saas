@@ -5,6 +5,7 @@
 
 import apiClient from '@/lib/api-client';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTenantStore } from '@/stores/tenant-store';
 import type {
   LoginRequest,
   RegisterRequest,
@@ -36,6 +37,15 @@ export const authService = {
 
       // Update auth store
       useAuthStore.getState().setUser(user);
+
+      // Load user tenant context after successful login
+      try {
+        await useTenantStore.getState().loadUserContext();
+        console.log('✅ User context loaded after login');
+      } catch (contextError) {
+        console.warn('⚠️ Failed to load user context:', contextError);
+        // Don't fail login if context loading fails
+      }
 
       console.log('✅ Login successful:', user.email);
       return response.data;
@@ -116,6 +126,9 @@ export const authService = {
       // Clear auth store
       useAuthStore.getState().logout();
 
+      // Clear tenant context
+      useTenantStore.getState().clearContext();
+
       console.log('✅ Logout successful - tokens cleared and store reset');
     } catch (error: any) {
       console.error('❌ Logout failed:', error.response?.data || error.message);
@@ -123,6 +136,7 @@ export const authService = {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       useAuthStore.getState().logout();
+      useTenantStore.getState().clearContext();
     }
   },
 

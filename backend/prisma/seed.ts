@@ -127,36 +127,47 @@ async function main() {
   console.log('✅ Outlet created');
 
   // Create Permissions
-  console.log('🔐 Creating permissions...');
+  console.log('🔐 Creating comprehensive permission registry...');
   const permissionsData = [
-    // Users
+    // ========================================================================
+    // USERS & ROLES
+    // ========================================================================
+    // Users - Tenant Level
+    {
+      code: 'users.read.tenant',
+      resource: 'users',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View all users in tenant',
+    },
+    {
+      code: 'users.create.tenant',
+      resource: 'users',
+      action: 'create',
+      scope: 'tenant',
+      description: 'Create users in tenant',
+    },
+    {
+      code: 'users.update.tenant',
+      resource: 'users',
+      action: 'update',
+      scope: 'tenant',
+      description: 'Update users in tenant',
+    },
+    {
+      code: 'users.delete.tenant',
+      resource: 'users',
+      action: 'delete',
+      scope: 'tenant',
+      description: 'Delete users in tenant',
+    },
+    // Users - Outlet Level
     {
       code: 'users.read.outlet',
       resource: 'users',
       action: 'read',
       scope: 'outlet',
-      description: 'View Users in own outlet',
-    },
-    {
-      code: 'users.create.outlet',
-      resource: 'users',
-      action: 'create',
-      scope: 'outlet',
-      description: 'Create Users',
-    },
-    {
-      code: 'users.update.outlet',
-      resource: 'users',
-      action: 'update',
-      scope: 'outlet',
-      description: 'Update Users',
-    },
-    {
-      code: 'users.delete.outlet',
-      resource: 'users',
-      action: 'delete',
-      scope: 'outlet',
-      description: 'Delete Users',
+      description: 'View users in own outlet',
     },
     // Roles
     {
@@ -164,152 +175,372 @@ async function main() {
       resource: 'roles',
       action: 'read',
       scope: 'tenant',
-      description: 'View Roles',
+      description: 'View roles',
     },
     {
       code: 'roles.create.tenant',
       resource: 'roles',
       action: 'create',
       scope: 'tenant',
-      description: 'Create Roles',
+      description: 'Create custom roles',
     },
     {
       code: 'roles.update.tenant',
       resource: 'roles',
       action: 'update',
       scope: 'tenant',
-      description: 'Update Roles',
+      description: 'Update roles',
     },
     {
       code: 'roles.delete.tenant',
       resource: 'roles',
       action: 'delete',
       scope: 'tenant',
-      description: 'Delete Roles',
+      description: 'Delete custom roles',
     },
-    // Outlets
+
+    // ========================================================================
+    // OUTLETS
+    // ========================================================================
     {
       code: 'outlets.read.tenant',
       resource: 'outlets',
       action: 'read',
       scope: 'tenant',
-      description: 'View Outlets',
+      description: 'View all outlets',
     },
     {
       code: 'outlets.create.tenant',
       resource: 'outlets',
       action: 'create',
       scope: 'tenant',
-      description: 'Create Outlets',
+      description: 'Create outlets',
     },
     {
       code: 'outlets.update.tenant',
       resource: 'outlets',
       action: 'update',
       scope: 'tenant',
-      description: 'Update Outlets',
+      description: 'Update outlets',
     },
     {
       code: 'outlets.delete.tenant',
       resource: 'outlets',
       action: 'delete',
       scope: 'tenant',
-      description: 'Delete Outlets',
+      description: 'Delete outlets',
     },
-    // Products
+
+    // ========================================================================
+    // PRODUCTS & CATEGORIES
+    // ========================================================================
+    // Products - Tenant Level
+    {
+      code: 'products.read.tenant',
+      resource: 'products',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View all products in tenant',
+    },
+    {
+      code: 'products.create.tenant',
+      resource: 'products',
+      action: 'create',
+      scope: 'tenant',
+      description: 'Create products',
+    },
+    {
+      code: 'products.update.tenant',
+      resource: 'products',
+      action: 'update',
+      scope: 'tenant',
+      description: 'Update products',
+    },
+    {
+      code: 'products.delete.tenant',
+      resource: 'products',
+      action: 'delete',
+      scope: 'tenant',
+      description: 'Delete products',
+    },
+    // Products - Outlet Level
     {
       code: 'products.read.outlet',
       resource: 'products',
       action: 'read',
       scope: 'outlet',
-      description: 'View Products',
+      description: 'View products in own outlet',
+    },
+    // Categories
+    {
+      code: 'categories.read.tenant',
+      resource: 'categories',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View product categories',
     },
     {
-      code: 'products.create.outlet',
-      resource: 'products',
-      action: 'create',
-      scope: 'outlet',
-      description: 'Create Products',
+      code: 'categories.manage.tenant',
+      resource: 'categories',
+      action: 'manage',
+      scope: 'tenant',
+      description: 'Manage product categories',
+    },
+
+    // ========================================================================
+    // INVENTORY & STOCK
+    // ========================================================================
+    // Inventory - Tenant Level
+    {
+      code: 'inventory.read.tenant',
+      resource: 'inventory',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View inventory across all outlets',
     },
     {
-      code: 'products.update.outlet',
-      resource: 'products',
-      action: 'update',
+      code: 'inventory.manage.tenant',
+      resource: 'inventory',
+      action: 'manage',
+      scope: 'tenant',
+      description: 'Manage inventory settings',
+    },
+    // Inventory - Outlet Level
+    {
+      code: 'inventory.read.outlet',
+      resource: 'inventory',
+      action: 'read',
       scope: 'outlet',
-      description: 'Update Products',
+      description: 'View inventory in own outlet',
     },
     {
-      code: 'products.delete.outlet',
-      resource: 'products',
-      action: 'delete',
+      code: 'inventory.manage.outlet',
+      resource: 'inventory',
+      action: 'manage',
       scope: 'outlet',
-      description: 'Delete Products',
+      description: 'Manage inventory in own outlet',
     },
-    // Transactions
+    // Stock Operations
+    {
+      code: 'stock.adjust.outlet',
+      resource: 'stock',
+      action: 'adjust',
+      scope: 'outlet',
+      description: 'Adjust stock levels',
+    },
+    {
+      code: 'stock.transfer.outlet',
+      resource: 'stock',
+      action: 'transfer',
+      scope: 'outlet',
+      description: 'Transfer stock between outlets',
+    },
+    {
+      code: 'stock.opname.outlet',
+      resource: 'stock',
+      action: 'opname',
+      scope: 'outlet',
+      description: 'Perform stock opname',
+    },
+
+    // ========================================================================
+    // TRANSACTIONS (POS)
+    // ========================================================================
     {
       code: 'transactions.read.outlet',
       resource: 'transactions',
       action: 'read',
       scope: 'outlet',
-      description: 'View Transactions',
+      description: 'View transactions in own outlet',
+    },
+    {
+      code: 'transactions.read.tenant',
+      resource: 'transactions',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View all transactions in tenant',
     },
     {
       code: 'transactions.create.outlet',
       resource: 'transactions',
       action: 'create',
       scope: 'outlet',
-      description: 'Create Transactions',
-    },
-    {
-      code: 'transactions.refund.outlet',
-      resource: 'transactions',
-      action: 'refund',
-      scope: 'outlet',
-      description: 'Refund Transactions',
+      description: 'Create new transactions (POS)',
     },
     {
       code: 'transactions.void.outlet',
       resource: 'transactions',
       action: 'void',
       scope: 'outlet',
-      description: 'Void Transactions',
+      description: 'Void transactions',
     },
-    // Reports
+    {
+      code: 'transactions.refund.outlet',
+      resource: 'transactions',
+      action: 'refund',
+      scope: 'outlet',
+      description: 'Process refunds',
+    },
+
+    // ========================================================================
+    // SUPPLIERS
+    // ========================================================================
+    {
+      code: 'suppliers.read.tenant',
+      resource: 'suppliers',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View suppliers',
+    },
+    {
+      code: 'suppliers.create.tenant',
+      resource: 'suppliers',
+      action: 'create',
+      scope: 'tenant',
+      description: 'Create suppliers',
+    },
+    {
+      code: 'suppliers.update.tenant',
+      resource: 'suppliers',
+      action: 'update',
+      scope: 'tenant',
+      description: 'Update suppliers',
+    },
+    {
+      code: 'suppliers.delete.tenant',
+      resource: 'suppliers',
+      action: 'delete',
+      scope: 'tenant',
+      description: 'Delete suppliers',
+    },
+
+    // ========================================================================
+    // REPORTS & ANALYTICS
+    // ========================================================================
+    // Reports - Outlet Level
     {
       code: 'reports.view.outlet',
       resource: 'reports',
       action: 'view',
       scope: 'outlet',
-      description: 'View Reports',
+      description: 'View reports for own outlet',
     },
     {
       code: 'reports.export.outlet',
       resource: 'reports',
       action: 'export',
       scope: 'outlet',
-      description: 'Export Reports',
+      description: 'Export reports for own outlet',
     },
-    // System
+    // Reports - Tenant Level
+    {
+      code: 'reports.view.tenant',
+      resource: 'reports',
+      action: 'view',
+      scope: 'tenant',
+      description: 'View reports across all outlets',
+    },
+    {
+      code: 'reports.export.tenant',
+      resource: 'reports',
+      action: 'export',
+      scope: 'tenant',
+      description: 'Export reports for tenant',
+    },
+    // Analytics
+    {
+      code: 'analytics.view.tenant',
+      resource: 'analytics',
+      action: 'view',
+      scope: 'tenant',
+      description: 'View analytics dashboard',
+    },
+    {
+      code: 'analytics.advanced.tenant',
+      resource: 'analytics',
+      action: 'advanced',
+      scope: 'tenant',
+      description: 'Access advanced analytics',
+    },
+
+    // ========================================================================
+    // KOPERASI (Cooperative Features)
+    // ========================================================================
+    // Loans
+    {
+      code: 'loans.read.tenant',
+      resource: 'loans',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View loans',
+    },
+    {
+      code: 'loans.create.tenant',
+      resource: 'loans',
+      action: 'create',
+      scope: 'tenant',
+      description: 'Create loan applications',
+    },
+    {
+      code: 'loans.approve.tenant',
+      resource: 'loans',
+      action: 'approve',
+      scope: 'tenant',
+      description: 'Approve/reject loans',
+    },
+    {
+      code: 'loans.manage.tenant',
+      resource: 'loans',
+      action: 'manage',
+      scope: 'tenant',
+      description: 'Manage loan payments',
+    },
+    // Savings
+    {
+      code: 'savings.read.tenant',
+      resource: 'savings',
+      action: 'read',
+      scope: 'tenant',
+      description: 'View savings accounts',
+    },
+    {
+      code: 'savings.create.tenant',
+      resource: 'savings',
+      action: 'create',
+      scope: 'tenant',
+      description: 'Create savings accounts',
+    },
+    {
+      code: 'savings.manage.tenant',
+      resource: 'savings',
+      action: 'manage',
+      scope: 'tenant',
+      description: 'Manage savings transactions',
+    },
+
+    // ========================================================================
+    // SYSTEM & SETTINGS
+    // ========================================================================
     {
       code: 'system.settings.tenant',
       resource: 'system',
       action: 'settings',
       scope: 'tenant',
-      description: 'Manage System Settings',
+      description: 'Manage tenant settings',
     },
     {
-      code: 'system.audit.read.tenant',
+      code: 'system.audit.tenant',
       resource: 'system',
       action: 'audit',
       scope: 'tenant',
-      description: 'View Audit Logs',
+      description: 'View audit logs',
     },
     {
       code: 'system.delete.tenant',
       resource: 'system',
       action: 'delete',
       scope: 'tenant',
-      description: 'Delete System Data',
+      description: 'Delete system data (danger zone)',
     },
   ];
 
@@ -331,76 +562,84 @@ async function main() {
   console.log('🌐 Creating platform roles...');
 
   // 1. SUPER_ADMIN - Full platform access
-  const superAdminRole = await prisma.role.upsert({
+  let superAdminRole = await prisma.role.findFirst({
     where: {
-      tenantId_name: {
-        tenantId: null,
-        name: 'SUPER_ADMIN',
-      },
-    },
-    update: {},
-    create: {
-      tenantId: null,
+      tenantId: null as any,
       name: 'SUPER_ADMIN',
-      description: 'Platform Super Administrator - Full access to all tenants',
-      isSystem: true,
-      level: 100,
     },
   });
+  
+  if (!superAdminRole) {
+    superAdminRole = await prisma.role.create({
+      data: {
+        tenantId: null as any,
+        name: 'SUPER_ADMIN',
+        description: 'Platform Super Administrator - Full access to all tenants',
+        isSystem: true,
+        level: 100,
+      },
+    });
+  }
 
   // 2. DEVELOPER - Technical access
-  const developerRole = await prisma.role.upsert({
+  let developerRole = await prisma.role.findFirst({
     where: {
-      tenantId_name: {
-        tenantId: null,
-        name: 'DEVELOPER',
-      },
-    },
-    update: {},
-    create: {
-      tenantId: null,
+      tenantId: null as any,
       name: 'DEVELOPER',
-      description: 'Platform Developer - Technical access, debugging, logs',
-      isSystem: true,
-      level: 90,
     },
   });
+  
+  if (!developerRole) {
+    developerRole = await prisma.role.create({
+      data: {
+        tenantId: null as any,
+        name: 'DEVELOPER',
+        description: 'Platform Developer - Technical access, debugging, logs',
+        isSystem: true,
+        level: 90,
+      },
+    });
+  }
 
   // 3. SUPPORT - Customer support
-  const supportRole = await prisma.role.upsert({
+  let supportRole = await prisma.role.findFirst({
     where: {
-      tenantId_name: {
-        tenantId: null,
-        name: 'SUPPORT',
-      },
-    },
-    update: {},
-    create: {
-      tenantId: null,
+      tenantId: null as any,
       name: 'SUPPORT',
-      description: 'Platform Support - Help tenants, view-only access',
-      isSystem: true,
-      level: 50,
     },
   });
+  
+  if (!supportRole) {
+    supportRole = await prisma.role.create({
+      data: {
+        tenantId: null as any,
+        name: 'SUPPORT',
+        description: 'Platform Support - Help tenants, view-only access',
+        isSystem: true,
+        level: 50,
+      },
+    });
+  }
 
   // 4. BILLING_ADMIN - Billing & subscriptions
-  const billingAdminRole = await prisma.role.upsert({
+  let billingAdminRole = await prisma.role.findFirst({
     where: {
-      tenantId_name: {
-        tenantId: null,
-        name: 'BILLING_ADMIN',
-      },
-    },
-    update: {},
-    create: {
-      tenantId: null,
+      tenantId: null as any,
       name: 'BILLING_ADMIN',
-      description: 'Platform Billing Admin - Manage subscriptions, invoices, payments',
-      isSystem: true,
-      level: 80,
     },
   });
+  
+  if (!billingAdminRole) {
+    billingAdminRole = await prisma.role.create({
+      data: {
+        tenantId: null as any,
+        name: 'BILLING_ADMIN',
+        description: 'Platform Billing Admin - Manage subscriptions, invoices, payments',
+        isSystem: true,
+        level: 80,
+      },
+    });
+  }
 
   console.log('✅ Platform roles created');
 
@@ -480,6 +719,7 @@ async function main() {
   const cashierPermissions = permissions.filter((p) =>
     [
       'products.read.outlet',
+      'inventory.read.outlet',
       'transactions.read.outlet',
       'transactions.create.outlet',
       'reports.view.outlet',
@@ -501,6 +741,184 @@ async function main() {
     });
   }
 
+  // Manager Role (full outlet operations + reports)
+  const managerRole = await prisma.role.upsert({
+    where: {
+      tenantId_name: {
+        tenantId: tenant.id,
+        name: 'MANAGER',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      name: 'MANAGER',
+      description: 'Outlet Manager',
+      isSystem: true,
+      level: 70,
+    },
+  });
+
+  const managerPermissions = permissions.filter((p) =>
+    [
+      // Users (outlet level)
+      'users.read.outlet',
+      // Products
+      'products.read.outlet',
+      'products.read.tenant',
+      'products.create.tenant',
+      'products.update.tenant',
+      // Categories
+      'categories.read.tenant',
+      'categories.manage.tenant',
+      // Inventory
+      'inventory.read.outlet',
+      'inventory.manage.outlet',
+      'stock.adjust.outlet',
+      'stock.transfer.outlet',
+      'stock.opname.outlet',
+      // Transactions
+      'transactions.read.outlet',
+      'transactions.create.outlet',
+      'transactions.void.outlet',
+      'transactions.refund.outlet',
+      // Suppliers
+      'suppliers.read.tenant',
+      // Reports
+      'reports.view.outlet',
+      'reports.export.outlet',
+      'reports.view.tenant',
+      'reports.export.tenant',
+    ].includes(p.code),
+  );
+  for (const permission of managerPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: managerRole.id,
+          permissionId: permission.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: managerRole.id,
+        permissionId: permission.id,
+      },
+    });
+  }
+
+  // Accountant Role (reports + analytics + transactions read)
+  const accountantRole = await prisma.role.upsert({
+    where: {
+      tenantId_name: {
+        tenantId: tenant.id,
+        name: 'ACCOUNTANT',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      name: 'ACCOUNTANT',
+      description: 'Accountant - Financial Reports & Analytics',
+      isSystem: true,
+      level: 80,
+    },
+  });
+
+  const accountantPermissions = permissions.filter((p) =>
+    [
+      // Transactions (read only)
+      'transactions.read.outlet',
+      'transactions.read.tenant',
+      // Products (read for cost analysis)
+      'products.read.outlet',
+      'products.read.tenant',
+      // Inventory (read for valuation)
+      'inventory.read.outlet',
+      'inventory.read.tenant',
+      // Suppliers (read)
+      'suppliers.read.tenant',
+      // Reports (full access)
+      'reports.view.outlet',
+      'reports.export.outlet',
+      'reports.view.tenant',
+      'reports.export.tenant',
+      // Analytics
+      'analytics.view.tenant',
+      'analytics.advanced.tenant',
+      // Koperasi
+      'loans.read.tenant',
+      'savings.read.tenant',
+      // System audit
+      'system.audit.tenant',
+    ].includes(p.code),
+  );
+  for (const permission of accountantPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: accountantRole.id,
+          permissionId: permission.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: accountantRole.id,
+        permissionId: permission.id,
+      },
+    });
+  }
+
+  // Viewer Role (read-only all resources)
+  const viewerRole = await prisma.role.upsert({
+    where: {
+      tenantId_name: {
+        tenantId: tenant.id,
+        name: 'VIEWER',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      name: 'VIEWER',
+      description: 'Viewer - Read-only access',
+      isSystem: true,
+      level: 10,
+    },
+  });
+
+  const viewerPermissions = permissions.filter((p) =>
+    [
+      'users.read.outlet',
+      'outlets.read.tenant',
+      'products.read.outlet',
+      'products.read.tenant',
+      'categories.read.tenant',
+      'inventory.read.outlet',
+      'inventory.read.tenant',
+      'transactions.read.outlet',
+      'suppliers.read.tenant',
+      'reports.view.outlet',
+      'loans.read.tenant',
+      'savings.read.tenant',
+    ].includes(p.code),
+  );
+  for (const permission of viewerPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        roleId_permissionId: {
+          roleId: viewerRole.id,
+          permissionId: permission.id,
+        },
+      },
+      update: {},
+      create: {
+        roleId: viewerRole.id,
+        permissionId: permission.id,
+      },
+    });
+  }
+
   console.log('✅ Roles created with permissions');
 
   // ============================================================================
@@ -514,10 +932,10 @@ async function main() {
     where: { email: 'superadmin@platform.com' },
     update: {},
     create: {
-      tenantId: null, // Platform-level
-      outletId: null, // Not tied to any outlet
+      tenantId: null as any, // Platform-level
+      outletId: null as any, // Not tied to any outlet
       roleId: superAdminRole.id,
-      username: 'superadmin',
+      username: 'platform_superadmin',
       email: 'superadmin@platform.com',
       passwordHash,
       firstName: 'Super',
@@ -531,10 +949,10 @@ async function main() {
     where: { email: 'developer@platform.com' },
     update: {},
     create: {
-      tenantId: null,
-      outletId: null,
+      tenantId: null as any,
+      outletId: null as any,
       roleId: developerRole.id,
-      username: 'developer',
+      username: 'platform_developer',
       email: 'developer@platform.com',
       passwordHash,
       firstName: 'Dev',
@@ -548,10 +966,10 @@ async function main() {
     where: { email: 'support@platform.com' },
     update: {},
     create: {
-      tenantId: null,
-      outletId: null,
+      tenantId: null as any,
+      outletId: null as any,
       roleId: supportRole.id,
-      username: 'support',
+      username: 'platform_support',
       email: 'support@platform.com',
       passwordHash,
       firstName: 'Support',
@@ -565,10 +983,10 @@ async function main() {
     where: { email: 'billing@platform.com' },
     update: {},
     create: {
-      tenantId: null,
-      outletId: null,
+      tenantId: null as any,
+      outletId: null as any,
       roleId: billingAdminRole.id,
-      username: 'billing',
+      username: 'platform_billing',
       email: 'billing@platform.com',
       passwordHash,
       firstName: 'Billing',

@@ -42,12 +42,26 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Inject tenant and outlet headers if available
+    const tenantId = localStorage.getItem('current_tenant_id');
+    const outletId = localStorage.getItem('current_outlet_id');
+
+    if (tenantId && config.headers) {
+      config.headers['x-tenant-id'] = tenantId;
+    }
+
+    if (outletId && config.headers) {
+      config.headers['x-outlet-id'] = outletId;
+    }
+
     // Log request in development
     if (env.environment === 'development') {
       console.log('📤 API Request:', {
         method: config.method?.toUpperCase(),
         url: config.url,
         data: config.data,
+        tenantId,
+        outletId,
       });
     }
 
