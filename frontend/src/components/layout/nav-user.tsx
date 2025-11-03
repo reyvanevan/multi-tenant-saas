@@ -8,6 +8,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import useDialogState from '@/hooks/use-dialog-state'
+import { useAuthStore } from '@/stores/auth-store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -27,16 +28,30 @@ import {
 import { SignOutDialog } from '@/components/sign-out-dialog'
 
 type NavUserProps = {
-  user: {
+  user?: {
     name: string
     email: string
     avatar: string
   }
 }
 
-export function NavUser({ user }: NavUserProps) {
+export function NavUser({ user: defaultUser }: NavUserProps) {
   const { isMobile } = useSidebar()
   const [open, setOpen] = useDialogState()
+  const authUser = useAuthStore((state) => state.user)
+
+  // Use auth store user data if available, fallback to default
+  const user = authUser ? {
+    name: authUser.firstName && authUser.lastName 
+      ? `${authUser.firstName} ${authUser.lastName}` 
+      : authUser.email,
+    email: authUser.email,
+    avatar: authUser.avatar || '',
+  } : (defaultUser || {
+    name: 'User',
+    email: 'user@example.com',
+    avatar: '',
+  })
 
   return (
     <>

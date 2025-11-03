@@ -84,8 +84,23 @@ export const authService = {
    */
   async logout(): Promise<void> {
     try {
-      // Call logout endpoint (if backend has one)
-      // await apiClient.post('/auth/logout');
+      const refreshToken = localStorage.getItem('refresh_token');
+
+      // Call backend logout endpoint if refresh token exists
+      if (refreshToken) {
+        try {
+          await apiClient.post('/auth/logout', {
+            refreshToken,
+          });
+          console.log('✅ Backend logout successful');
+        } catch (error: any) {
+          console.warn(
+            '⚠️ Backend logout failed, clearing local state anyway:',
+            error.response?.data || error.message,
+          );
+          // Continue with local logout even if backend call fails
+        }
+      }
 
       // Clear tokens from localStorage
       localStorage.removeItem('access_token');
@@ -94,7 +109,7 @@ export const authService = {
       // Clear auth store
       useAuthStore.getState().logout();
 
-      console.log('✅ Logout successful');
+      console.log('✅ Logout successful - tokens cleared and store reset');
     } catch (error: any) {
       console.error('❌ Logout failed:', error.response?.data || error.message);
       // Still clear local state even if API call fails
