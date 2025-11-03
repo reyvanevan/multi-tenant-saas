@@ -325,26 +325,91 @@ async function main() {
 
   console.log(`✅ Created ${permissions.length} permissions`);
 
-  // Create Roles
-  console.log('👥 Creating roles...');
+  // ============================================================================
+  // PLATFORM ROLES (tenantId = null)
+  // ============================================================================
+  console.log('🌐 Creating platform roles...');
 
-  // Super Admin Role (all permissions)
+  // 1. SUPER_ADMIN - Full platform access
   const superAdminRole = await prisma.role.upsert({
     where: {
       tenantId_name: {
-        tenantId: tenant.id,
+        tenantId: null,
         name: 'SUPER_ADMIN',
       },
     },
     update: {},
     create: {
-      tenantId: tenant.id,
+      tenantId: null,
       name: 'SUPER_ADMIN',
-      description: 'Super Administrator with all permissions',
+      description: 'Platform Super Administrator - Full access to all tenants',
+      isSystem: true,
+      level: 100,
     },
   });
 
-  // Assign all permissions to Super Admin
+  // 2. DEVELOPER - Technical access
+  const developerRole = await prisma.role.upsert({
+    where: {
+      tenantId_name: {
+        tenantId: null,
+        name: 'DEVELOPER',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: null,
+      name: 'DEVELOPER',
+      description: 'Platform Developer - Technical access, debugging, logs',
+      isSystem: true,
+      level: 90,
+    },
+  });
+
+  // 3. SUPPORT - Customer support
+  const supportRole = await prisma.role.upsert({
+    where: {
+      tenantId_name: {
+        tenantId: null,
+        name: 'SUPPORT',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: null,
+      name: 'SUPPORT',
+      description: 'Platform Support - Help tenants, view-only access',
+      isSystem: true,
+      level: 50,
+    },
+  });
+
+  // 4. BILLING_ADMIN - Billing & subscriptions
+  const billingAdminRole = await prisma.role.upsert({
+    where: {
+      tenantId_name: {
+        tenantId: null,
+        name: 'BILLING_ADMIN',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: null,
+      name: 'BILLING_ADMIN',
+      description: 'Platform Billing Admin - Manage subscriptions, invoices, payments',
+      isSystem: true,
+      level: 80,
+    },
+  });
+
+  console.log('✅ Platform roles created');
+
+  // ============================================================================
+  // TENANT ROLES (tenantId = tenant.id)
+  // ============================================================================
+  console.log('🏢 Creating tenant roles...');
+
+  // Assign all permissions to Super Admin (this is just for the tenant, not platform)
   for (const permission of permissions) {
     await prisma.rolePermission.upsert({
       where: {
@@ -438,19 +503,22 @@ async function main() {
 
   console.log('✅ Roles created with permissions');
 
-  // Create Test Users
-  console.log('👤 Creating test users...');
+  // ============================================================================
+  // PLATFORM USERS (tenantId = null, outletId = null)
+  // ============================================================================
+  console.log('🌐 Creating platform users...');
   const passwordHash = await bcrypt.hash('password123', 10);
 
+  // 1. Super Admin User
   const superAdminUser = await prisma.user.upsert({
-    where: { email: 'superadmin@demo.com' },
+    where: { email: 'superadmin@platform.com' },
     update: {},
     create: {
-      tenantId: tenant.id,
-      outletId: outlet.id,
+      tenantId: null, // Platform-level
+      outletId: null, // Not tied to any outlet
       roleId: superAdminRole.id,
       username: 'superadmin',
-      email: 'superadmin@demo.com',
+      email: 'superadmin@platform.com',
       passwordHash,
       firstName: 'Super',
       lastName: 'Admin',
@@ -458,12 +526,71 @@ async function main() {
     },
   });
 
+  // 2. Developer User
+  const developerUser = await prisma.user.upsert({
+    where: { email: 'developer@platform.com' },
+    update: {},
+    create: {
+      tenantId: null,
+      outletId: null,
+      roleId: developerRole.id,
+      username: 'developer',
+      email: 'developer@platform.com',
+      passwordHash,
+      firstName: 'Dev',
+      lastName: 'Team',
+      isActive: true,
+    },
+  });
+
+  // 3. Support User
+  const supportUser = await prisma.user.upsert({
+    where: { email: 'support@platform.com' },
+    update: {},
+    create: {
+      tenantId: null,
+      outletId: null,
+      roleId: supportRole.id,
+      username: 'support',
+      email: 'support@platform.com',
+      passwordHash,
+      firstName: 'Support',
+      lastName: 'Team',
+      isActive: true,
+    },
+  });
+
+  // 4. Billing Admin User
+  const billingAdminUser = await prisma.user.upsert({
+    where: { email: 'billing@platform.com' },
+    update: {},
+    create: {
+      tenantId: null,
+      outletId: null,
+      roleId: billingAdminRole.id,
+      username: 'billing',
+      email: 'billing@platform.com',
+      passwordHash,
+      firstName: 'Billing',
+      lastName: 'Admin',
+      isActive: true,
+    },
+  });
+
+  console.log('✅ Platform users created');
+
+  // ============================================================================
+  // TENANT USERS (tenantId = tenant.id, tied to specific tenant/outlet)
+  // ============================================================================
+  console.log('👤 Creating tenant users...');
+
+  // Admin for Demo Tenant
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@demo.com' },
     update: {},
     create: {
-      tenantId: tenant.id,
-      outletId: outlet.id,
+      tenantId: tenant.id, // Belongs to Demo Tenant
+      outletId: outlet.id, // Assigned to main outlet
       roleId: adminRole.id,
       username: 'admin',
       email: 'admin@demo.com',
@@ -474,12 +601,13 @@ async function main() {
     },
   });
 
+  // Cashier for Demo Tenant
   const cashierUser = await prisma.user.upsert({
     where: { email: 'cashier@demo.com' },
     update: {},
     create: {
-      tenantId: tenant.id,
-      outletId: outlet.id,
+      tenantId: tenant.id, // Belongs to Demo Tenant
+      outletId: outlet.id, // Assigned to main outlet
       roleId: cashierRole.id,
       username: 'cashier',
       email: 'cashier@demo.com',
@@ -490,7 +618,7 @@ async function main() {
     },
   });
 
-  console.log('✅ Test users created');
+  console.log('✅ Tenant users created');
 
   // Create Product Categories
   console.log('📦 Creating product categories...');
@@ -661,24 +789,45 @@ async function main() {
   console.log('✅ Sample products created (7 products)');
 
   console.log('\n🎉 Seed completed successfully!\n');
-  console.log('📝 Test Users:');
-  console.log('  1. Super Admin:');
-  console.log('     Email: superadmin@demo.com');
-  console.log('     Password: password123');
-  console.log('     Permissions: ALL');
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log('📝 PLATFORM USERS (No Tenant/Outlet - Manage ALL tenants)');
+  console.log('═══════════════════════════════════════════════════════════════');
   console.log('');
-  console.log('  2. Admin:');
+  console.log('  1. 🔴 SUPER ADMIN (Full Platform Access):');
+  console.log('     Email: superadmin@platform.com');
+  console.log('     Password: password123');
+  console.log('     Access: Manage all tenants, subscriptions, platform settings');
+  console.log('');
+  console.log('  2. 💻 DEVELOPER (Technical Access):');
+  console.log('     Email: developer@platform.com');
+  console.log('     Password: password123');
+  console.log('     Access: Debugging, logs, technical support');
+  console.log('');
+  console.log('  3. 🎧 SUPPORT (Customer Support):');
+  console.log('     Email: support@platform.com');
+  console.log('     Password: password123');
+  console.log('     Access: Help tenants, view-only access');
+  console.log('');
+  console.log('  4. 💳 BILLING ADMIN (Billing & Subscriptions):');
+  console.log('     Email: billing@platform.com');
+  console.log('     Password: password123');
+  console.log('     Access: Manage subscriptions, invoices, payments');
+  console.log('');
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log('📝 TENANT USERS (Demo Koperasi - Tenant-specific)');
+  console.log('═══════════════════════════════════════════════════════════════');
+  console.log('');
+  console.log('  5. 👤 ADMIN (Tenant Admin):');
   console.log('     Email: admin@demo.com');
   console.log('     Password: password123');
-  console.log('     Permissions: ALL except system.delete');
+  console.log('     Access: Manage Demo Koperasi operations');
   console.log('');
-  console.log('  3. Cashier:');
+  console.log('  6. 🛒 CASHIER (Outlet Staff):');
   console.log('     Email: cashier@demo.com');
   console.log('     Password: password123');
-  console.log(
-    '     Permissions: products.read, transactions.read/create, reports.view',
-  );
+  console.log('     Access: POS, transactions, products (Demo Koperasi only)');
   console.log('');
+  console.log('═══════════════════════════════════════════════════════════════');
 }
 
 main()

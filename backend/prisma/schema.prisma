@@ -121,8 +121,8 @@ enum OutletType {
 
 model User {
   id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId    String?  // null for platform admins
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   // Basic Info
   username    String   @unique
@@ -182,8 +182,8 @@ model User {
 
 model Role {
   id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId    String?  // null for platform roles
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   
   name        String   // Owner, Admin, Manager, Cashier, etc
   description String?
